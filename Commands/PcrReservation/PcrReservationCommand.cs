@@ -18,10 +18,131 @@ namespace NepPure.Onebot.Commands.PcrReservation
         {
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
+            var message = new List<CQCode>();
 
+            var enqueuRes = PcrReservationManager.Enqueue(groupId, new PcrReservationModel(sender.UserId, sender.Nick));
 
-            await eventArgs.Reply(CQCode.CQAt(sender.UserId),
-                CQCode.CQText("不出 爪巴"));
+            var alluser = PcrReservationManager.PeekAll(groupId);
+            var first = alluser.FirstOrDefault();
+            if (first == null)
+            {
+                await eventArgs.Reply("奇怪，队列里面找不到人");
+                return;
+            }
+
+            if (enqueuRes)
+            {
+                // 成功加入队列               
+                message.Add(CQCode.CQText("预约成功，"));
+            }
+            else
+            {
+                // 已经正在队列
+                message.Add(CQCode.CQText("您已经预约过啦，"));
+            }
+
+            message.Add(CQCode.CQAt(first.UserId));
+
+            if (first.UserId == sender.UserId)
+            {
+                // 成功加入队列 
+                message.Add(CQCode.CQText("当前无人出刀，请出刀，出刀结束记得回复【报刀】哦！"));
+            }
+            else
+            {
+                message.Add(CQCode.CQText("正在出刀，请等待他回复【报刀】"));
+            }
+            message.AddRange(GetWaitUserMessage(alluser.Skip(1).ToList()));
+
+            await eventArgs.Reply(message);
+        }
+
+        [GroupCommand(new string[] { "报刀" })]
+        public async ValueTask Report(GroupMessageEventArgs eventArgs)
+        {
+            var sender = eventArgs.SenderInfo;
+            var groupId = eventArgs.SourceGroup.Id;
+            var message = new List<CQCode>();
+
+            var first = PcrReservationManager.Peek(groupId);
+            if (first == null)
+            {
+                await eventArgs.Reply("奇怪，队列里面找不到人");
+                return;
+            }
+
+            if (sender.UserId != first.UserId)
+            {
+                await eventArgs.Reply("当前没有轮到您出刀呢，管理员可以通过【强制报刀】命令帮助小伙伴报刀");
+                return;
+            }
+
+            PcrReservationManager.Dequeue(groupId);
+            var alluser = PcrReservationManager.PeekAll(groupId);
+            first = alluser.FirstOrDefault();
+            message.Add(CQCode.CQText("辛苦啦~\n"));
+            if (first != null)
+            {
+                message.Add(CQCode.CQAt(first.UserId));
+                message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】哦"));
+            }
+            message.AddRange(GetWaitUserMessage(alluser.Skip(1).ToList()));
+
+            await eventArgs.Reply(message);
+        }
+
+        [GroupCommand(new string[] { "强制报刀" },
+            PermissionLevel = Sora.Enumeration.EventParamsType.MemberRoleType.Admin)]
+        public async ValueTask ForceReport(GroupMessageEventArgs eventArgs)
+        {
+            var groupId = eventArgs.SourceGroup.Id;
+            var message = new List<CQCode>();
+
+            PcrReservationManager.Dequeue(groupId);
+            var alluser = PcrReservationManager.PeekAll(groupId);
+            var first = alluser.FirstOrDefault();
+            message.Add(CQCode.CQText("嗯！我就当小伙伴出完刀了~\n"));
+            if (first != null)
+            {
+                message.Add(CQCode.CQAt(first.UserId));
+                message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】哦"));
+            }
+            message.AddRange(GetWaitUserMessage(alluser.Skip(1).ToList()));
+
+            await eventArgs.Reply(message);
+        }
+
+        [GroupCommand(new string[] { "清空预约出刀" },
+        PermissionLevel = Sora.Enumeration.EventParamsType.MemberRoleType.Admin)]
+        public async ValueTask ForceClear(GroupMessageEventArgs eventArgs)
+        {
+            var groupId = eventArgs.SourceGroup.Id;
+            var message = new List<CQCode>();
+
+            PcrReservationManager.ClearQueue(groupId);
+            message.Add(CQCode.CQText("出刀队列已清空"));
+            await eventArgs.Reply(message);
+        }
+
+        private List<CQCode> GetWaitUserMessage(IList<PcrReservationModel> models)
+        {
+            if (models.Count == 0)
+            {
+                return new List<CQCode>();
+            }
+
+            var res = new List<CQCode>
+            {
+                CQCode.CQText($"\n当前还有{models.Count}位小伙伴等待出刀，他们是：\n")
+            };
+            int index = 1;
+
+            foreach (var model in models)
+            {
+                res.Add(CQCode.CQText($"{index++}. {model.NickName}\n"));
+            }
+
+            return res;
         }
     }
 }

@@ -16,11 +16,11 @@ SoraWebsocketServer server = new(new ServerConfig { Port = 9200 });
 
 //服务器连接事件
 server.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
-                                        {
-                                            Log.Debug("Sora",
-                                                             $"connectionId = {connectionInfo} type = {eventArgs.Role}");
-                                            return ValueTask.CompletedTask;
-                                        };
+{
+    Log.Debug("Sora",
+                     $"connectionId = {connectionInfo} type = {eventArgs.Role}");
+    return ValueTask.CompletedTask;
+};
 //服务器连接关闭事件
 server.ConnManager.OnCloseConnectionAsync += (connectionInfo, eventArgs) =>
 {

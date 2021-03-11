@@ -88,6 +88,21 @@ namespace NepPure.Onebot.Commands.PcrReservation
             return null;
         }
 
+        public static List<PcrReservationModel> PeekAll(long groupId)
+        {
+            if (!_data.ContainsKey(groupId))
+            {
+                return new List<PcrReservationModel>();
+            }
+
+            if (_data[groupId].IsEmpty)
+            {
+                return new List<PcrReservationModel>();
+            }
+
+            return _data[groupId].ToList();
+        }
+
         public static PcrReservationModel Dequeue(long groupId)
         {
             if (!_data.ContainsKey(groupId))
