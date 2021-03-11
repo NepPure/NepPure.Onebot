@@ -20,7 +20,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             var groupId = eventArgs.SourceGroup.Id;
             var message = new List<CQCode>();
 
-            var enqueuRes = PcrReservationManager.Enqueue(groupId, new PcrReservationModel(sender.UserId, sender.Nick));
+            var enqueuRes = PcrReservationManager.Enqueue(groupId, new PcrReservationModel(sender.UserId, sender.Card));
 
             var alluser = PcrReservationManager.PeekAll(groupId);
             var first = alluser.FirstOrDefault();
