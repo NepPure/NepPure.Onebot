@@ -91,6 +91,23 @@ namespace NepPure.Onebot.Commands.PcrReservation
             await eventArgs.Reply(message);
         }
 
+        [GroupCommand(new string[] { "查看预约" })]
+        public async ValueTask View(GroupMessageEventArgs eventArgs)
+        {
+            var groupId = eventArgs.SourceGroup.Id;
+            var message = new List<CQCode>();
+
+            var alluser = PcrReservationManager.PeekAll(groupId);
+            if (alluser.Count == 0)
+            {
+                await eventArgs.Reply("当前无人预约出刀");
+                return;
+            }
+
+            message.AddRange(GetWaitUserMessage(alluser));
+            await eventArgs.Reply(message);
+        }
+
         [GroupCommand(new string[] { "强制报刀" },
             PermissionLevel = Sora.Enumeration.EventParamsType.MemberRoleType.Admin)]
         public async ValueTask ForceReport(GroupMessageEventArgs eventArgs)
@@ -133,7 +150,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             var res = new List<CQCode>
             {
-                CQCode.CQText($"\n当前还有{models.Count}位小伙伴等待出刀，他们是：\n")
+                CQCode.CQText($"当前还有{models.Count}位小伙伴等待出刀，他们是：\n")
             };
             int index = 1;
 
