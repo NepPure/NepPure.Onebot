@@ -80,9 +80,10 @@ namespace NepPure.Onebot.Commands.PcrReservation
             PcrReservationManager.Dequeue(groupId);
             var alluser = PcrReservationManager.PeekAll(groupId);
             first = alluser.FirstOrDefault();
-            message.Add(CQCode.CQText("辛苦啦~\n"));
+            message.Add(CQCode.CQText("辛苦啦~"));
             if (first != null)
             {
+                message.Add(CQCode.CQText("\n"));
                 message.Add(CQCode.CQAt(first.UserId));
                 message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】哦"));
             }
@@ -101,9 +102,10 @@ namespace NepPure.Onebot.Commands.PcrReservation
             PcrReservationManager.Dequeue(groupId);
             var alluser = PcrReservationManager.PeekAll(groupId);
             var first = alluser.FirstOrDefault();
-            message.Add(CQCode.CQText("嗯！我就当小伙伴出完刀了~\n"));
+            message.Add(CQCode.CQText("嗯！我就当小伙伴出完刀了~"));
             if (first != null)
             {
+                message.Add(CQCode.CQText("\n"));
                 message.Add(CQCode.CQAt(first.UserId));
                 message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】哦"));
             }

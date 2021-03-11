@@ -13,19 +13,26 @@ namespace NepPure.Onebot.Commands.PcrReservation
     {
         private static readonly object _lock = new();
         private static ConcurrentDictionary<long, ConcurrentQueue<PcrReservationModel>> _data;
-        private const string DATA_PATH = "data/PcrReservation/PcrReservation.json";
-
+        private const string DATA_PATH = "data/PcrReservation";
+        private const string FILE_NAME = "data.json";
+        private static readonly string FilePath = Path.Combine(DATA_PATH, FILE_NAME);
         static PcrReservationManager()
         {
             lock (_lock)
             {
-                if (File.Exists(DATA_PATH))
+                if (!Directory.Exists(DATA_PATH))
                 {
-                    var sourceStr = File.ReadAllText(DATA_PATH);
+                    Directory.CreateDirectory(DATA_PATH);
+                }
+
+                if (File.Exists(FilePath))
+                {
+                    var sourceStr = File.ReadAllText(FilePath);
                     _data = JsonConvert.DeserializeObject<ConcurrentDictionary<long, ConcurrentQueue<PcrReservationModel>>>(sourceStr);
                 }
                 else
                 {
+                    File.WriteAllText(FilePath, "");
                     _data = new ConcurrentDictionary<long, ConcurrentQueue<PcrReservationModel>>();
                 }
             }
@@ -36,7 +43,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             lock (_lock)
             {
                 var sourceStr = JsonConvert.SerializeObject(_data, Formatting.Indented);
-                File.WriteAllText(DATA_PATH, sourceStr);
+                File.WriteAllText(FilePath, sourceStr);
             }
         }
 
