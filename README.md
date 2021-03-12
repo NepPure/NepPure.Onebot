@@ -1,6 +1,8 @@
 # NepPure.Onebot
 [![.NET](https://github.com/NepPure/NepPure.Onebot/actions/workflows/dotnet.yml/badge.svg)](https://github.com/NepPure/NepPure.Onebot/actions/workflows/dotnet.yml)
 
+本项目基于https://github.com/Yukari316/Sora
+
 自用 QQ BOT
 
 ### 目前PCR会战预约功能开发中
