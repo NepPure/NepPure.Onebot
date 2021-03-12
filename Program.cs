@@ -7,7 +7,7 @@ using YukariToolBox.Extensions;
 using YukariToolBox.FormatLog;
 
 //设置log等级
-Log.SetLogLevel(LogLevel.Debug);
+Log.SetLogLevel(LogLevel.Info);
 
 //实例化服务器
 SoraWebsocketServer server = new(new ServerConfig { Port = 9200 });
