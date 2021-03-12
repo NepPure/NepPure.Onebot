@@ -1,4 +1,6 @@
 # NepPure.Onebot
+[![.NET](https://github.com/NepPure/NepPure.Onebot/actions/workflows/dotnet.yml/badge.svg)](https://github.com/NepPure/NepPure.Onebot/actions/workflows/dotnet.yml)
+
 自用 QQ BOT
 
 ### 目前PCR会战预约功能开发中
@@ -30,7 +32,7 @@ BOT：您已经预约过啦， 当前@B正在出刀，请等待他回复“报�
 
 ```
 
-管理元：强制报刀
+管理员：强制报刀
 BOT：好的，就当@B出完刀了，@C 轮到你出刀啦~
 
 管理员：清空预约出刀
