@@ -51,7 +51,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             if (first.UserId == sender.UserId)
             {
                 // 成功加入队列 
-                message.Add(CQCode.CQText("当前无人出刀，请出刀，出刀结束记得回复【报刀】哦！"));
+                message.Add(CQCode.CQText("当前无人出刀，请出刀，出刀结束记得回复【报刀】！"));
             }
             else
             {
@@ -90,7 +90,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             {
                 message.Add(CQCode.CQText("\n"));
                 message.Add(CQCode.CQAt(first.UserId));
-                message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】哦"));
+                message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】！"));
             }
             message.AddRange(GetWaitUserMessage(alluser.Skip(1).ToList()));
 
@@ -129,7 +129,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             {
                 message.Add(CQCode.CQText("\n"));
                 message.Add(CQCode.CQAt(first.UserId));
-                message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】哦"));
+                message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】!"));
             }
             message.AddRange(GetWaitUserMessage(alluser.Skip(1).ToList()));
 
@@ -157,7 +157,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             var res = new List<CQCode>
             {
-                CQCode.CQText($"当前还有{models.Count}位小伙伴等待出刀，他们是：\n")
+                CQCode.CQText($"当前出刀队列有{models.Count}位小伙伴，他们是：\n")
             };
             int index = 1;
 
