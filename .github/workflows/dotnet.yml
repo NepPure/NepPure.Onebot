@@ -23,8 +23,8 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
-    - name: release
-      run: dotnet build -c Release /p:DeployOnBuild=true /p:PublishProfile=FolderProfile
+    - name: Release
+      run: dotnet build "NepPure.Onebot.sln" -c Release /p:DeployOnBuild=true /p:PublishProfile=FolderProfile
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v2
       with:
