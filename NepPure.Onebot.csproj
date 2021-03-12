@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sora" Version="0.7.0" />
+    <PackageReference Include="Sora" Version="0.8.0" />
   </ItemGroup>
 
 </Project>
