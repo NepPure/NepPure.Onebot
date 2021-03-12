@@ -24,9 +24,9 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Release
-      run: dotnet publish -p:PublishProfile=FolderProfile
+      run: dotnet publish -c Release -p:PublishProfile=FolderProfile
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v2
       with:
-       name: release
+       name: NepPure.Onebot
        path: bin/Release/net5.0/publish/
