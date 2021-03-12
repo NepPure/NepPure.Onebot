@@ -57,7 +57,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             {
                 message.Add(CQCode.CQText("正在出刀，请等待他回复【报刀】"));
             }
-            message.AddRange(GetWaitUserMessage(alluser.Skip(1).ToList()));
+            message.AddRange(GetWaitUserMessage(alluser));
 
             await eventArgs.Reply(message);
         }
@@ -92,7 +92,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 message.Add(CQCode.CQAt(first.UserId));
                 message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】！"));
             }
-            message.AddRange(GetWaitUserMessage(alluser.Skip(1).ToList()));
+            message.AddRange(GetWaitUserMessage(alluser));
 
             await eventArgs.Reply(message);
         }
@@ -131,7 +131,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 message.Add(CQCode.CQAt(first.UserId));
                 message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】!"));
             }
-            message.AddRange(GetWaitUserMessage(alluser.Skip(1).ToList()));
+            message.AddRange(GetWaitUserMessage(alluser));
 
             await eventArgs.Reply(message);
         }
