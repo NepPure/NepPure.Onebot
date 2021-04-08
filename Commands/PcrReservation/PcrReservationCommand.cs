@@ -1,4 +1,4 @@
-﻿using Sora.Command.Attributes;
+﻿using Sora.Attributes.Command;
 using Sora.Entities.CQCodes;
 using Sora.Entities.CQCodes.CQCodeModel;
 using Sora.EventArgs.SoraEvent;
