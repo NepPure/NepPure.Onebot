@@ -166,7 +166,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             foreach (var model in models)
             {
-                res.Add(CQCode.CQText($"{index++}.{model.NickName}\n"));
+                res.Add(CQCode.CQText($"{index++}.[{model.ReserveTime.ToShortTimeString()}] {model.NickName}\n"));
             }
 
             return res;
