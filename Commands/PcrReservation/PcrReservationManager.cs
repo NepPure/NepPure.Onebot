@@ -145,6 +145,8 @@ namespace NepPure.Onebot.Commands.PcrReservation
             {
                 target.IsCancel = true;
             }
+
+            DataSync();
             return target;
         }
 
