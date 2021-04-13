@@ -25,7 +25,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 userName = sender.Nick;
             }
 
-            var enqueuRes = PcrReservationManager.Enqueue(groupId, new PcrReservationModel(sender.UserId, userName));
+            PcrReservationManager.Enqueue(groupId, new PcrReservationModel(sender.UserId, userName));
 
             var alluser = PcrReservationManager.PeekAll(groupId);
             var first = alluser.FirstOrDefault();
@@ -35,27 +35,19 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 return;
             }
 
-            if (enqueuRes)
-            {
-                // 成功加入队列               
-                message.Add(CQCode.CQText("预约成功，"));
-            }
-            else
-            {
-                // 已经正在队列
-                message.Add(CQCode.CQText("您已经预约过啦，"));
-            }
+            message.Add(CQCode.CQText("预约成功，若需要出多刀请多次预约"));
+
 
             message.Add(CQCode.CQAt(first.UserId));
 
             if (first.UserId == sender.UserId)
             {
                 // 成功加入队列 
-                message.Add(CQCode.CQText("当前无人出刀，请出刀，出刀结束记得回复【报刀】！"));
+                message.Add(CQCode.CQText("当前您在出刀队列第一位，请出刀。"));
             }
             else
             {
-                message.Add(CQCode.CQText("正在出刀，请等待他回复【报刀】"));
+                message.Add(CQCode.CQText("正在出刀，如果您的【预约位置x刀伤<BOSS血量】，可以考虑一起出刀"));
             }
             message.AddRange(GetWaitUserMessage(alluser));
 
@@ -78,14 +70,25 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             if (sender.UserId != first.UserId)
             {
-                await eventArgs.Reply("当前没有轮到您出刀呢，管理员可以通过【强制报刀】命令帮助小伙伴报刀");
-                return;
+                var target = PcrReservationManager.SetCancel(groupId, sender.UserId);
+                if (target == null)
+                {
+                    //出刀队列没有他
+                    message.Add(CQCode.CQText("好像没有您的预约记录。"));
+                }
+                else
+                {
+                    message.Add(CQCode.CQText("好的已经记录您提前出完刀啦~"));
+                }
+            }
+            else
+            {
+                PcrReservationManager.Dequeue(groupId);
+                message.Add(CQCode.CQText("辛苦啦~"));
             }
 
-            PcrReservationManager.Dequeue(groupId);
             var alluser = PcrReservationManager.PeekAll(groupId);
             first = alluser.FirstOrDefault();
-            message.Add(CQCode.CQText("辛苦啦~"));
             if (first != null)
             {
                 message.Add(CQCode.CQText("\n"));
@@ -163,7 +166,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             foreach (var model in models)
             {
-                res.Add(CQCode.CQText($"{index++}. {model.NickName}\n"));
+                res.Add(CQCode.CQText($"{index++}.【】{model.NickName}\n"));
             }
 
             return res;

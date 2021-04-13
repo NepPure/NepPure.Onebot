@@ -47,10 +47,8 @@ namespace NepPure.Onebot.Commands.PcrReservation
             }
         }
 
-        public static bool Enqueue(long groupId, PcrReservationModel user)
+        public static void Enqueue(long groupId, PcrReservationModel user)
         {
-            bool alreadyExist = false;
-
             _data.AddOrUpdate(groupId, key =>
             {
                 var val = new ConcurrentQueue<PcrReservationModel>();
@@ -59,25 +57,13 @@ namespace NepPure.Onebot.Commands.PcrReservation
             },
             (key, val) =>
             {
-                if (val.Any(m => m.UserId == user.UserId))
-                {
-                    alreadyExist = true;
-                }
-                else
-                {
-                    val.Enqueue(user);
-                }
-
+                //此处允许重复预约
+                val.Enqueue(user);
                 return val;
             });
 
-            if (alreadyExist)
-            {
-                return false;
-            }
-
             DataSync();
-            return true;
+            return;
         }
 
         public static PcrReservationModel Peek(long groupId)
@@ -87,12 +73,28 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 return null;
             }
 
-            if (_data[groupId].TryPeek(out PcrReservationModel result))
+            while (true)
             {
-                return result;
+                if (_data[groupId].TryPeek(out PcrReservationModel result))
+                {
+                    //队列里有
+                    if (result.IsCancel)
+                    {
+                        //已取消，移除队列
+                        _data[groupId].TryDequeue(out PcrReservationModel _);
+                    }
+                    else
+                    {
+                        // 没取消返回
+                        return result;
+                    }
+                }
+                else
+                {
+                    //队列里没有
+                    return null;
+                }
             }
-
-            return null;
         }
 
         public static List<PcrReservationModel> PeekAll(long groupId)
@@ -107,7 +109,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 return new List<PcrReservationModel>();
             }
 
-            return _data[groupId].ToList();
+            return _data[groupId].Where(m => m.IsCancel == false).ToList();
         }
 
         public static PcrReservationModel Dequeue(long groupId)
@@ -124,6 +126,26 @@ namespace NepPure.Onebot.Commands.PcrReservation
             }
 
             return null;
+        }
+
+        public static PcrReservationModel SetCancel(long groupId, long userId)
+        {
+            if (!_data.ContainsKey(groupId))
+            {
+                return null;
+            }
+
+            var target = _data[groupId]
+                   .Where(m => m.UserId == userId)
+                   .Where(m => m.IsCancel == false)
+                   .OrderBy(m => m.ReserveTime)
+                   .FirstOrDefault();
+
+            if (target != null)
+            {
+                target.IsCancel = true;
+            }
+            return target;
         }
 
         public static int GetQueueLength(long groupId)

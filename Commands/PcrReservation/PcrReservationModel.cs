@@ -17,10 +17,14 @@ namespace NepPure.Onebot.Commands.PcrReservation
         {
             UserId = userId;
             NickName = nickName;
+            ReserveTime = DateTime.Now;
         }
 
         public long UserId { get; set; }
 
         public string NickName { get; set; }
+
+        public bool IsCancel { get; set; }
+        public DateTime ReserveTime { get; set; }
     }
 }
