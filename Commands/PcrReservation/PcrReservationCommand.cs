@@ -35,7 +35,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 return;
             }
 
-            message.Add(CQCode.CQText("预约成功，若需要出多刀请多次预约"));
+            message.Add(CQCode.CQText("预约成功，若需要出多刀请多次预约。"));
 
 
             message.Add(CQCode.CQAt(first.UserId));
@@ -47,7 +47,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             }
             else
             {
-                message.Add(CQCode.CQText("正在出刀，如果您的【预约位置x刀伤<BOSS血量】，可以考虑一起出刀"));
+                message.Add(CQCode.CQText("正在出刀，如果您的\n【预约位置 ✖ 刀伤 < BOSS血量】\n可以考虑一起出刀。"));
             }
             message.AddRange(GetWaitUserMessage(alluser));
 
@@ -166,7 +166,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             foreach (var model in models)
             {
-                res.Add(CQCode.CQText($"{index++}.【】{model.NickName}\n"));
+                res.Add(CQCode.CQText($"{index++}.{model.NickName}\n"));
             }
 
             return res;
