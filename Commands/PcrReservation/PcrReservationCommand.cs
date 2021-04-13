@@ -160,13 +160,13 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             var res = new List<CQCode>
             {
-                CQCode.CQText($"当前出刀队列有{models.Count}位小伙伴，他们是：\n")
+                CQCode.CQText($"当前出刀队列有{models.Count}位小伙伴，他们是：")
             };
             int index = 1;
 
             foreach (var model in models)
             {
-                res.Add(CQCode.CQText($"{index++}.[{model.ReserveTime.ToShortTimeString()}] {model.NickName}\n"));
+                res.Add(CQCode.CQText($"\n{index++}.[{model.ReserveTime.ToShortTimeString()}] {model.NickName}"));
             }
 
             return res;
