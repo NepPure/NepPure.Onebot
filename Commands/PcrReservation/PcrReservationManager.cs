@@ -81,7 +81,10 @@ namespace NepPure.Onebot.Commands.PcrReservation
                     if (result.IsCancel)
                     {
                         //已取消，移除队列
-                        _data[groupId].TryDequeue(out PcrReservationModel _);
+                        if(_data[groupId].TryDequeue(out PcrReservationModel _))
+                        {
+                            DataSync();                        
+                        }
                     }
                     else
                     {
