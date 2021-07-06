@@ -54,7 +54,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             await eventArgs.Reply(message);
         }
 
-        [GroupCommand(new string[] { "^报刀.*" })]
+        [GroupCommand(new string[] { "^报刀.*", "^报🔪.*" })]
         public async ValueTask Report(GroupMessageEventArgs eventArgs)
         {
             var sender = eventArgs.SenderInfo;
