@@ -13,7 +13,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
     [CommandGroup]
     public class PcrReservationCommand
     {
-        [GroupCommand(new string[] { "^预约出刀", "^申请出刀", "出刀" })]
+        [GroupCommand(new string[] { "^预约出刀.*", "^申请出刀.*", "出刀" })]
         public async ValueTask Reserve(GroupMessageEventArgs eventArgs)
         {
             var sender = eventArgs.SenderInfo;
