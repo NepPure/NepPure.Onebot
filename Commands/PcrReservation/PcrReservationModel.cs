@@ -13,11 +13,12 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
         }
 
-        public PcrReservationModel(long userId, string nickName)
+        public PcrReservationModel(long userId, string nickName, string ps)
         {
             UserId = userId;
             NickName = nickName;
             ReserveTime = DateTime.Now;
+            Ps = ps;
         }
 
         public long UserId { get; set; }
@@ -25,6 +26,9 @@ namespace NepPure.Onebot.Commands.PcrReservation
         public string NickName { get; set; }
 
         public bool IsCancel { get; set; }
+
         public DateTime ReserveTime { get; set; }
+
+        public string Ps { get; set; } = string.Empty;
     }
 }

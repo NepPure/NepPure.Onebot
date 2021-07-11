@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace NepPure.Onebot.Commands.PcrReservation
@@ -13,9 +14,19 @@ namespace NepPure.Onebot.Commands.PcrReservation
     [CommandGroup]
     public class PcrReservationCommand
     {
-        [GroupCommand(new string[] { "^预约出刀.*", "^申请出刀.*", "出刀" })]
+        [GroupCommand(new string[] { "^预约出刀.*", "^申请出刀.*", "^出刀.*" })]
         public async ValueTask Reserve(GroupMessageEventArgs eventArgs)
         {
+            var ps = string.Empty;
+            var rawtext = eventArgs.Message.RawText;
+            var reg = new Regex(".*出刀(.*)");
+            var regResult = reg.Match(rawtext);
+            if (regResult.Success
+                && regResult.Groups.Count > 0)
+            {
+                ps = regResult.Groups[1].ToString().Trim();
+            }
+
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
             var message = new List<CQCode>();
@@ -25,7 +36,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 userName = sender.Nick;
             }
 
-            PcrReservationManager.Enqueue(groupId, new PcrReservationModel(sender.UserId, userName));
+            PcrReservationManager.Enqueue(groupId, new PcrReservationModel(sender.UserId, userName, ps));
 
             var alluser = PcrReservationManager.PeekAll(groupId);
             var first = alluser.FirstOrDefault();
@@ -36,7 +47,6 @@ namespace NepPure.Onebot.Commands.PcrReservation
             }
 
             message.Add(CQCode.CQText("预约成功，若需要出多刀请多次预约。"));
-
 
             message.Add(CQCode.CQAt(first.UserId));
 
@@ -166,7 +176,12 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             foreach (var model in models)
             {
-                res.Add(CQCode.CQText($"\n{index++}.[{model.ReserveTime.ToShortTimeString()}] {model.NickName}"));
+                var info = $"\n{index++}.[{model.ReserveTime.ToShortTimeString()}] {model.NickName}";
+                if (!string.IsNullOrWhiteSpace(model.Ps))
+                {
+                    info += $"：{model.Ps}";
+                }
+                res.Add(CQCode.CQText(info));
             }
 
             return res;
