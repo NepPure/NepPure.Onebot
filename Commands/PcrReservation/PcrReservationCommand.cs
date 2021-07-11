@@ -29,7 +29,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<object>();
+            var message = new List<CQCode>();
             var userName = sender.Card;
             if (string.IsNullOrWhiteSpace(userName))
             {
@@ -69,7 +69,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
         {
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<object>();
+            var message = new List<CQCode>();
 
             var first = PcrReservationManager.Peek(groupId);
             if (first == null)
@@ -114,7 +114,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
         public async ValueTask View(GroupMessageEventArgs eventArgs)
         {
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<object>();
+            var message = new List<CQCode>();
 
             var alluser = PcrReservationManager.PeekAll(groupId);
             if (alluser.Count == 0)
@@ -132,7 +132,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
         public async ValueTask ForceReport(GroupMessageEventArgs eventArgs)
         {
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<object>();
+            var message = new List<CQCode>();
 
             PcrReservationManager.Dequeue(groupId);
             var alluser = PcrReservationManager.PeekAll(groupId);
@@ -154,21 +154,21 @@ namespace NepPure.Onebot.Commands.PcrReservation
         public async ValueTask ForceClear(GroupMessageEventArgs eventArgs)
         {
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<object>();
+            var message = new List<CQCode>();
 
             PcrReservationManager.ClearQueue(groupId);
             message.Add(CQCode.CQText("出刀队列已清空"));
             await eventArgs.Reply(message);
         }
 
-        private List<object> GetWaitUserMessage(IList<PcrReservationModel> models)
+        private List<CQCode> GetWaitUserMessage(IList<PcrReservationModel> models)
         {
             if (models.Count == 0)
             {
-                return new List<object>();
+                return new List<CQCode>();
             }
 
-            var res = new List<object>
+            var res = new List<CQCode>
             {
                 CQCode.CQText($"当前出刀队列有{models.Count}位小伙伴，他们是：")
             };
@@ -177,12 +177,11 @@ namespace NepPure.Onebot.Commands.PcrReservation
             foreach (var model in models)
             {
                 var info = $"\n{index++}.[{model.ReserveTime.ToShortTimeString()}] {model.NickName}";
-
-                res.Add(CQCode.CQText(info));
                 if (!string.IsNullOrWhiteSpace(model.Ps))
                 {
-                    res.Add($"：{model.Ps}");
+                    info += $"：{model.Ps}";
                 }
+                res.Add(CQCode.CQText(info));
             }
 
             return res;
