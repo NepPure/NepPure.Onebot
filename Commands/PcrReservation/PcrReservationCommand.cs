@@ -13,7 +13,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
     [CommandGroup]
     public class PcrReservationCommand
     {
-        [GroupCommand(new string[] { "^预约出刀.*", "^申请出刀.*", "^出刀.*" })]
+        [GroupCommand(CommandExpressions = new[] { "^预约出刀.*", "^申请出刀.*", "^出刀.*" }, MatchType = Sora.Enumeration.MatchType.Regex)]
         public async ValueTask Reserve(GroupMessageEventArgs eventArgs)
         {
             var ps = string.Empty;
@@ -63,7 +63,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             await eventArgs.Reply(message);
         }
 
-        [GroupCommand(new string[] { "^报刀.*", "^报🔪.*" })]
+        [GroupCommand(CommandExpressions = new[] { "^报刀.*", "^报🔪.*" }, MatchType = Sora.Enumeration.MatchType.Regex)]
         public async ValueTask Report(GroupMessageEventArgs eventArgs)
         {
             var sender = eventArgs.SenderInfo;
