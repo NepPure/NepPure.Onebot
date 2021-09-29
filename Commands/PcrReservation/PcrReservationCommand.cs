@@ -1,11 +1,10 @@
 ﻿using Sora.Attributes.Command;
-using Sora.Entities.CQCodes;
-using Sora.Entities.CQCodes.CQCodeModel;
+using Sora.Entities;
+using Sora.Entities.Segment;
+using Sora.Entities.Segment.DataModel;
 using Sora.EventArgs.SoraEvent;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -29,7 +28,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<CQCode>();
+            var message = new MessageBody();
             var userName = sender.Card;
             if (string.IsNullOrWhiteSpace(userName))
             {
@@ -46,18 +45,18 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 return;
             }
 
-            message.Add(CQCode.CQText("预约成功，若需要出多刀请多次预约。"));
+            message.Add("预约成功，若需要出多刀请多次预约。");
 
-            message.Add(CQCode.CQAt(first.UserId));
+            message.Add(SegmentBuilder.At(first.UserId));
 
             if (first.UserId == sender.UserId)
             {
                 // 成功加入队列 
-                message.Add(CQCode.CQText("当前您在出刀队列第一位，请出刀。"));
+                message.Add("当前您在出刀队列第一位，请出刀。");
             }
             else
             {
-                message.Add(CQCode.CQText("正在出刀，如果您的\n【预约位置 ✖ 刀伤 < BOSS血量】\n可以考虑一起出刀。"));
+                message.Add("正在出刀，如果您的\n【预约位置 ✖ 刀伤 < BOSS血量】\n可以考虑一起出刀。");
             }
             message.AddRange(GetWaitUserMessage(alluser));
 
@@ -69,7 +68,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
         {
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<CQCode>();
+            var message = new MessageBody();
 
             var first = PcrReservationManager.Peek(groupId);
             if (first == null)
@@ -84,26 +83,26 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 if (target == null)
                 {
                     //出刀队列没有他
-                    message.Add(CQCode.CQText("好像没有您的预约记录。"));
+                    message.Add("好像没有您的预约记录。");
                 }
                 else
                 {
-                    message.Add(CQCode.CQText("好的已经记录您提前出完刀啦~"));
+                    message.Add("好的已经记录您提前出完刀啦~");
                 }
             }
             else
             {
                 PcrReservationManager.Dequeue(groupId);
-                message.Add(CQCode.CQText("辛苦啦~"));
+                message.Add("辛苦啦~");
             }
 
             var alluser = PcrReservationManager.PeekAll(groupId);
             first = alluser.FirstOrDefault();
             if (first != null)
             {
-                message.Add(CQCode.CQText("\n"));
-                message.Add(CQCode.CQAt(first.UserId));
-                message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】！"));
+                message.Add("\n");
+                message.Add(SegmentBuilder.At(first.UserId));
+                message.Add("轮到您出刀了呢，出刀结束记得回复【报刀】！");
             }
             message.AddRange(GetWaitUserMessage(alluser));
 
@@ -114,7 +113,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
         public async ValueTask View(GroupMessageEventArgs eventArgs)
         {
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<CQCode>();
+            var message = new MessageBody();
 
             var alluser = PcrReservationManager.PeekAll(groupId);
             if (alluser.Count == 0)
@@ -132,17 +131,17 @@ namespace NepPure.Onebot.Commands.PcrReservation
         public async ValueTask ForceReport(GroupMessageEventArgs eventArgs)
         {
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<CQCode>();
+            var message = new MessageBody();
 
             PcrReservationManager.Dequeue(groupId);
             var alluser = PcrReservationManager.PeekAll(groupId);
             var first = alluser.FirstOrDefault();
-            message.Add(CQCode.CQText("嗯！我就当小伙伴出完刀了~"));
+            message.Add("嗯！我就当小伙伴出完刀了~");
             if (first != null)
             {
-                message.Add(CQCode.CQText("\n"));
-                message.Add(CQCode.CQAt(first.UserId));
-                message.Add(CQCode.CQText("轮到您出刀了呢，出刀结束记得回复【报刀】!"));
+                message.Add("\n");
+                message.Add(SegmentBuilder.At(first.UserId));
+                message.Add("轮到您出刀了呢，出刀结束记得回复【报刀】!");
             }
             message.AddRange(GetWaitUserMessage(alluser));
 
@@ -154,23 +153,23 @@ namespace NepPure.Onebot.Commands.PcrReservation
         public async ValueTask ForceClear(GroupMessageEventArgs eventArgs)
         {
             var groupId = eventArgs.SourceGroup.Id;
-            var message = new List<CQCode>();
+            var message = new MessageBody();
 
             PcrReservationManager.ClearQueue(groupId);
-            message.Add(CQCode.CQText("出刀队列已清空"));
+            message.Add("出刀队列已清空");
             await eventArgs.Reply(message);
         }
 
-        private List<CQCode> GetWaitUserMessage(IList<PcrReservationModel> models)
+        private List<SoraSegment> GetWaitUserMessage(IList<PcrReservationModel> models)
         {
             if (models.Count == 0)
             {
-                return new List<CQCode>();
+                return new List<SoraSegment>();
             }
 
-            var res = new List<CQCode>
+            var res = new List<SoraSegment>
             {
-                CQCode.CQText($"当前出刀队列有{models.Count}位小伙伴，他们是：")
+                SegmentBuilder.Text($"当前出刀队列有{models.Count}位小伙伴，他们是：")
             };
             int index = 1;
 
@@ -181,7 +180,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 {
                     info += $"：{model.Ps}";
                 }
-                res.Add(CQCode.CQText(info));
+                res.Add(SegmentBuilder.Text(info));
             }
 
             return res;

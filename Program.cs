@@ -1,47 +1,45 @@
-﻿using System;
-using System.IO;
+﻿using Sora.Net;
 using System.Threading.Tasks;
-using Sora.Net;
-using Sora.OnebotModel;
-using YukariToolBox.Extensions;
+using Sora.Entities.Segment;
+using Sora.Enumeration;
+using Sora.Net.Config;
 using YukariToolBox.FormatLog;
 
 //设置log等级
 Log.SetLogLevel(LogLevel.Info);
 
-//实例化服务器
-SoraWebsocketServer server = new(new ServerConfig { Port = 9200 });
-
-#region 服务器事件处理
-
-//服务器连接事件
-server.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
+//实例化Sora服务
+var service = SoraServiceFactory.CreateService(new ServerConfig()
 {
-    Log.Debug("Sora",
-                     $"connectionId = {connectionInfo} type = {eventArgs.Role}");
+    Port = 9200
+});
+
+#region 事件处理
+
+//连接事件
+service.ConnManager.OnOpenConnectionAsync += (connectionInfo, eventArgs) =>
+{
+    Log.Debug("Sora_Test|OnOpenConnectionAsync",
+              $"connectionId = {connectionInfo} type = {eventArgs.Role}");
     return ValueTask.CompletedTask;
 };
-//服务器连接关闭事件
-server.ConnManager.OnCloseConnectionAsync += (connectionInfo, eventArgs) =>
+//连接关闭事件
+service.ConnManager.OnCloseConnectionAsync += (connectionInfo, eventArgs) =>
 {
-    Log.Debug("Sora",
-                     $"connectionId = {connectionInfo} type = {eventArgs.Role}");
+    Log.Debug("Sora_Test|OnCloseConnectionAsync",
+              $"uid = {eventArgs.SelfId} connectionId = {connectionInfo} type = {eventArgs.Role}");
     return ValueTask.CompletedTask;
 };
-//服务器心跳包超时事件
-server.ConnManager.OnHeartBeatTimeOut += (connectionInfo, eventArgs) =>
+//连接成功元事件
+service.Event.OnClientConnect += (type, eventArgs) =>
 {
-    Log.Debug("Sora",
-                     $"Get heart beat time out from[{connectionInfo}] uid[{eventArgs.SelfId}]");
-    return ValueTask.CompletedTask;
-};
-
-server.Event.OnSelfMessage += (type, eventArgs) =>
-{
-    Log.Info("test", $"self msg {eventArgs.Message.MessageId}");
+    Log.Debug("Sora_Test|OnClientConnect",
+              $"uid = {eventArgs.LoginUid}");
     return ValueTask.CompletedTask;
 };
 #endregion
 
-//启动服务器并捕捉错误
-await server.StartServer().RunCatch(e => Log.Error("Server Error", Log.ErrorLogBuilder(e)));
+//启动服务并捕捉错误
+await service.StartService();
+//.RunCatch(e => Log.Error("Sora Service", Log.ErrorLogBuilder(e)));
+await Task.Delay(-1);
