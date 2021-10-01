@@ -27,8 +27,14 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
         public bool IsCancel { get; set; }
 
+        public bool IsOnTree { get; set; }
+
         public DateTime ReserveTime { get; set; }
 
+        public DateTime? TreeTime { get; set; }
+        /// <summary>
+        /// 留言
+        /// </summary>
         public string Ps { get; set; } = string.Empty;
     }
 }

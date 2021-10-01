@@ -3,6 +3,7 @@ using Sora.Entities;
 using Sora.Entities.Segment;
 using Sora.Entities.Segment.DataModel;
 using Sora.EventArgs.SoraEvent;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -73,7 +74,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             var first = PcrReservationManager.Peek(groupId);
             if (first == null)
             {
-                await eventArgs.Reply("奇怪，队列里面找不到人");
+                await eventArgs.Reply("你没约！");
                 return;
             }
 
@@ -109,7 +110,67 @@ namespace NepPure.Onebot.Commands.PcrReservation
             await eventArgs.Reply(message);
         }
 
-        [GroupCommand(new string[] { "查看预约" })]
+        [GroupCommand(CommandExpressions = new[] { "^挂树.*" }, MatchType = Sora.Enumeration.MatchType.Regex)]
+        public async ValueTask OnTree(GroupMessageEventArgs eventArgs)
+        {
+            var ps = string.Empty;
+            var rawtext = eventArgs.Message.RawText;
+            var reg = new Regex(".*挂树(.*)");
+            var regResult = reg.Match(rawtext);
+            if (regResult.Success
+                && regResult.Groups.Count > 0)
+            {
+                ps = regResult.Groups[1].ToString().Trim();
+            }
+
+            var sender = eventArgs.SenderInfo;
+            var groupId = eventArgs.SourceGroup.Id;
+            var message = new MessageBody();
+            var userName = sender.Card;
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                userName = sender.Nick;
+            }
+
+            PcrReservationManager.SetOnTree(groupId, sender.UserId, userName, ps);
+
+            var alluser = PcrReservationManager.PeekAll(groupId);
+            var first = alluser.FirstOrDefault();
+            if (first == null)
+            {
+                await eventArgs.Reply("奇怪，队列里面找不到人");
+                return;
+            }
+
+            message.Add("挂稳了~（<ゝω·）诶嘿~☆");
+            message.AddRange(GetWaitUserMessage(alluser));
+            await eventArgs.Reply(message);
+        }
+
+        [GroupCommand(CommandExpressions = new[] { "^下树.*" }, MatchType = Sora.Enumeration.MatchType.Regex)]
+        public async ValueTask OffTree(GroupMessageEventArgs eventArgs)
+        {
+            var sender = eventArgs.SenderInfo;
+            var groupId = eventArgs.SourceGroup.Id;
+            var message = new MessageBody();
+
+            var first = PcrReservationManager.SetOffTree(groupId, sender.UserId);
+            if (first == null)
+            {
+                await eventArgs.Reply("树上没你。");
+                return;
+            }
+            message.Add("已下树。");
+            var alluser = PcrReservationManager.PeekAll(groupId);
+            if (alluser.Count > 0)
+            {
+                message.AddRange(GetWaitUserMessage(alluser));
+            }
+            await eventArgs.Reply(message);
+        }
+
+
+        [GroupCommand(new string[] { "查看预约", "查看队列", "查看挂树" })]
         public async ValueTask View(GroupMessageEventArgs eventArgs)
         {
             var groupId = eventArgs.SourceGroup.Id;
@@ -169,11 +230,11 @@ namespace NepPure.Onebot.Commands.PcrReservation
 
             var res = new List<SoraSegment>
             {
-                SegmentBuilder.Text($"当前出刀队列有{models.Count}位小伙伴，他们是：")
+                SegmentBuilder.Text($"当前队列有{models.Count}位小伙伴，他们是：")
             };
             int index = 1;
 
-            foreach (var model in models)
+            foreach (var model in models.Where(m => !m.IsOnTree))
             {
                 var info = $"\n{index++}.[{model.ReserveTime.ToShortTimeString()}] {model.NickName}";
                 if (!string.IsNullOrWhiteSpace(model.Ps))
@@ -183,6 +244,20 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 res.Add(SegmentBuilder.Text(info));
             }
 
+            res.Add(SegmentBuilder.Text("\n在树上的："));
+            foreach (var model in models.Where(m => m.IsOnTree))
+            {
+                var info = $"\n{index++}.[{(DateTime.Now - (model.TreeTime ?? model.ReserveTime)).TotalMinutes:0}分钟] {model.NickName}";
+                if (!string.IsNullOrWhiteSpace(model.Ps))
+                {
+                    info += $"：{model.Ps}";
+                }
+                res.Add(SegmentBuilder.Text(info));
+            }
+            if (!models.Any(m => m.IsOnTree))
+            {
+                res.Add(SegmentBuilder.Text("无"));
+            }
             return res;
         }
     }

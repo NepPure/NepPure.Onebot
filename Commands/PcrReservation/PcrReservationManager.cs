@@ -47,7 +47,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             }
         }
 
-        public static void Enqueue(long groupId, PcrReservationModel user)
+        public static PcrReservationModel Enqueue(long groupId, PcrReservationModel user)
         {
             _data.AddOrUpdate(groupId, key =>
             {
@@ -63,7 +63,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             });
 
             DataSync();
-            return;
+            return user;
         }
 
         public static PcrReservationModel Peek(long groupId)
@@ -81,9 +81,9 @@ namespace NepPure.Onebot.Commands.PcrReservation
                     if (result.IsCancel)
                     {
                         //已取消，移除队列
-                        if(_data[groupId].TryDequeue(out PcrReservationModel _))
+                        if (_data[groupId].TryDequeue(out PcrReservationModel _))
                         {
-                            DataSync();                        
+                            DataSync();
                         }
                     }
                     else
@@ -112,7 +112,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 return new List<PcrReservationModel>();
             }
 
-            return _data[groupId].Where(m => m.IsCancel == false).ToList();
+            return _data[groupId].Where(m => m.IsCancel == false).OrderBy(m => m.ReserveTime).ToList();
         }
 
         public static PcrReservationModel Dequeue(long groupId)
@@ -153,6 +153,60 @@ namespace NepPure.Onebot.Commands.PcrReservation
             return target;
         }
 
+        public static PcrReservationModel SetOnTree(long groupId, long userId, string nickName, string message)
+        {
+            if (!_data.ContainsKey(groupId))
+            {
+                return null;
+            }
+
+            var target = _data[groupId]
+                   .Where(m => m.UserId == userId)
+                   .Where(m => m.IsCancel == false)
+                   .OrderBy(m => m.ReserveTime)
+                   .FirstOrDefault();
+
+            if (target == null)
+            {
+                target = Enqueue(groupId, new PcrReservationModel(userId, nickName, message)
+                {
+                    IsOnTree = true
+                });
+            }
+            else
+            {
+                target.IsOnTree = true;
+                target.Ps = message;
+                target.TreeTime ??= DateTime.Now;
+            }
+
+            DataSync();
+            return target;
+        }
+
+        public static PcrReservationModel SetOffTree(long groupId, long userId)
+        {
+            if (!_data.ContainsKey(groupId))
+            {
+                return null;
+            }
+
+            var target = _data[groupId]
+                   .Where(m => m.UserId == userId)
+                   .Where(m => m.IsCancel == false)
+                   .OrderBy(m => m.ReserveTime)
+                   .FirstOrDefault();
+
+            if (target != null)
+            {
+                target.IsOnTree = false;
+                target.IsCancel = true;
+            }
+
+            DataSync();
+            return target;
+        }
+
         public static int GetQueueLength(long groupId)
         {
             if (!_data.ContainsKey(groupId))
@@ -160,7 +214,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 return 0;
             }
 
-            return _data[groupId].Count;
+            return _data[groupId].Where(m => !m.IsCancel).Count();
         }
 
         public static void ClearQueue(long groupId)
