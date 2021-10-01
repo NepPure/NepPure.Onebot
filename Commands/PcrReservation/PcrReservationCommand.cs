@@ -202,14 +202,21 @@ namespace NepPure.Onebot.Commands.PcrReservation
             {
                 message.Add("\n");
                 message.Add(SegmentBuilder.At(first.UserId));
-                message.Add("轮到您出刀了呢，出刀结束记得回复【报刀】!");
+                if (first.IsOnTree)
+                {
+                    message.Add("你还在树上挂着!");
+                }
+                else
+                {
+                    message.Add("轮到您出刀了呢，出刀结束记得回复【报刀】!");
+                }
             }
             message.AddRange(GetWaitUserMessage(alluser));
 
             await eventArgs.Reply(message);
         }
 
-        [GroupCommand(new string[] { "清空预约出刀" },
+        [GroupCommand(new string[] { "清空预约出刀", "清空出刀队列" },
         PermissionLevel = Sora.Enumeration.EventParamsType.MemberRoleType.Admin)]
         public async ValueTask ForceClear(GroupMessageEventArgs eventArgs)
         {
@@ -217,7 +224,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             var message = new MessageBody();
 
             PcrReservationManager.ClearQueue(groupId);
-            message.Add("出刀队列已清空");
+            message.Add("队列已清空");
             await eventArgs.Reply(message);
         }
 
