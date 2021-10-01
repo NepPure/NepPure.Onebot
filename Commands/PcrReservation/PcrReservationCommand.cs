@@ -103,7 +103,14 @@ namespace NepPure.Onebot.Commands.PcrReservation
             {
                 message.Add("\n");
                 message.Add(SegmentBuilder.At(first.UserId));
-                message.Add("轮到您出刀了呢，出刀结束记得回复【报刀】！");
+                if (first.IsOnTree)
+                {
+                    message.Add("你还在树上挂着！");
+                }
+                else
+                {
+                    message.Add("轮到您出刀了呢，出刀结束记得回复【报刀】!");
+                }
             }
             message.AddRange(GetWaitUserMessage(alluser));
 
@@ -204,7 +211,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
                 message.Add(SegmentBuilder.At(first.UserId));
                 if (first.IsOnTree)
                 {
-                    message.Add("你还在树上挂着!");
+                    message.Add("你还在树上挂着！");
                 }
                 else
                 {
