@@ -57,7 +57,15 @@ namespace NepPure.Onebot.Commands.PcrReservation
             }
             else
             {
-                message.Add("正在出刀，如果您的\n【预约位置 ✖ 刀伤 < BOSS血量】\n可以考虑一起出刀。");
+                if (first.IsOnTree)
+                {
+                    message.Add("挂得很稳，如果您的\n【预约位置 ✖ 刀伤 < BOSS血量】\n可以考虑一起出刀。");
+                }
+                else
+                {
+                    message.Add("正在出刀，如果您的\n【预约位置 ✖ 刀伤 < BOSS血量】\n可以考虑一起出刀。");
+
+                }
             }
             message.AddRange(GetWaitUserMessage(alluser));
 
