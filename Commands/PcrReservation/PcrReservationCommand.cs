@@ -154,7 +154,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             await eventArgs.Reply(message);
         }
 
-        [GroupCommand(CommandExpressions = new[] { "^下树.*" }, MatchType = Sora.Enumeration.MatchType.Regex)]
+        [GroupCommand(new string[] { "下树" })]
         public async ValueTask OffTree(GroupMessageEventArgs eventArgs)
         {
             var sender = eventArgs.SenderInfo;
