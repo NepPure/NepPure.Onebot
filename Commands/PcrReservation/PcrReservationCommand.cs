@@ -102,7 +102,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             else
             {
                 PcrReservationManager.Dequeue(groupId);
-                message.Add("辛苦啦~");
+                message.Add("(๑•̀ㅂ•́)و✧辛苦啦~");
             }
 
             var alluser = PcrReservationManager.PeekAll(groupId);
