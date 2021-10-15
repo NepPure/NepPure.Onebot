@@ -30,6 +30,8 @@ namespace NepPure.Onebot.Commands.PcrReservation
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
             var message = new MessageBody();
+            message.Add(SegmentBuilder.At(sender.UserId));
+
             var userName = sender.Card;
             if (string.IsNullOrWhiteSpace(userName))
             {
@@ -78,6 +80,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
             var message = new MessageBody();
+            message.Add(SegmentBuilder.At(sender.UserId));
 
             var first = PcrReservationManager.Peek(groupId);
             if (first == null)
@@ -141,6 +144,8 @@ namespace NepPure.Onebot.Commands.PcrReservation
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
             var message = new MessageBody();
+            message.Add(SegmentBuilder.At(sender.UserId));
+
             var userName = sender.Card;
             if (string.IsNullOrWhiteSpace(userName))
             {
@@ -168,6 +173,7 @@ namespace NepPure.Onebot.Commands.PcrReservation
             var sender = eventArgs.SenderInfo;
             var groupId = eventArgs.SourceGroup.Id;
             var message = new MessageBody();
+            message.Add(SegmentBuilder.At(sender.UserId));
 
             var first = PcrReservationManager.SetOffTree(groupId, sender.UserId);
             if (first == null)
@@ -190,6 +196,8 @@ namespace NepPure.Onebot.Commands.PcrReservation
         {
             var groupId = eventArgs.SourceGroup.Id;
             var message = new MessageBody();
+            var sender = eventArgs.SenderInfo;
+            message.Add(SegmentBuilder.At(sender.UserId));
 
             var alluser = PcrReservationManager.PeekAll(groupId);
             if (alluser.Count == 0)
@@ -208,6 +216,8 @@ namespace NepPure.Onebot.Commands.PcrReservation
         {
             var groupId = eventArgs.SourceGroup.Id;
             var message = new MessageBody();
+            var sender = eventArgs.SenderInfo;
+            message.Add(SegmentBuilder.At(sender.UserId));
 
             PcrReservationManager.Dequeue(groupId);
             var alluser = PcrReservationManager.PeekAll(groupId);
@@ -237,6 +247,8 @@ namespace NepPure.Onebot.Commands.PcrReservation
         {
             var groupId = eventArgs.SourceGroup.Id;
             var message = new MessageBody();
+            var sender = eventArgs.SenderInfo;
+            message.Add(SegmentBuilder.At(sender.UserId));
 
             PcrReservationManager.ClearQueue(groupId);
             message.Add("队列已清空");
